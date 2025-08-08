@@ -1,0 +1,41 @@
+🗂️ 1. Projektstruktur sauber anlegen
+ sunSano-website/
+ ├── index.html
+├── /assets
+│   ├── /css
+│   │   └── style.css
+│   ├── /images
+│   │   ├── hero.jpg
+│   │   └── saft1.jpg ...
+│   └── /pdf
+│       └── speisekarte.pdf
+└── /js
+    └── main.js (optional, für spätere Features)
+
+
+🎨 2. Design von Inhalt trennen
+	•	Alles <style>-Zeug raus aus <head> → in style.css
+	•	In index.html nur noch:
+
+🌐 3. HTML strukturieren
+	•	Saubere Semantik: header, nav, main, section, footer
+	•	Klassen sprechend benennen (.hero, .produkt-grid, .testimonial-card, …)
+	•	IDs nur bei gezielten Navigationszielen (z. B. id="kontakt")
+
+⸻
+
+📦 4. Features einbauen
+	•	Produktbereich (Säfte) → Grid aus Cards mit Bild + Name + Preis
+	•	Kontaktformular mit Name, E-Mail, Nachricht
+	•	Responsive Design mit Media Queries
+	•	SEO-Tags (title, description, og:image etc.)
+
+⸻
+
+🧪 5. Testing & Qualität
+	•	Validieren bei https://validator.w3.org/
+	•	Lighthouse-Analyse mit Chrome DevTools
+	•	Responsives Verhalten auf Smartphone prüfen
+	•	Alt-Texte für Barrierefreiheit
+
+    
