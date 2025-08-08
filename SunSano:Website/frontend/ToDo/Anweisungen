@@ -1,0 +1,73 @@
+# ✅ SunSano Webshop – To-Do Übersicht für echten Zahlungsprozess
+
+## 🎯 Ziel
+Statt nur einer Simulation im Frontend soll der Webshop ein echtes, sicheres Bestellsystem mit Zahlungsanbindung (z. B. Stripe) und Backend-Verarbeitung bekommen.
+
+---
+
+## 1. 🧼 Frontend aufräumen & vorbereiten
+
+- [ ] `checkout.js`-Simulation entfernen (aktuell nur Fake-„Bestellung erfolgreich“)
+- [ ] UI beibehalten (Warenkorb, Formular, Zahlungsoptionen)
+- [ ] Echte Weiterleitung zu Stripe / PayPal integrieren
+- [ ] API-Call zum Backend beim Klick auf "Bestellung aufgeben"
+
+---
+
+## 2. ⚙️ Backend erstellen (z. B. Node.js + Express)
+
+- [ ] Route: `POST /api/create-order`
+  - Speichert Kunden- und Bestelldaten
+  - Erstellt Stripe-Checkout-Session
+- [ ] Route: `POST /api/webhook`
+  - Empfängt Zahlungsbestätigung von Stripe
+  - Setzt Bestellstatus auf `paid`
+- [ ] Verbindung zu Datenbank (z. B. SQLite)
+
+---
+
+## 3. 💳 Zahlungsanbieter integrieren
+
+### Stripe (empfohlen):
+
+- [ ] Stripe API Key einrichten
+- [ ] Checkout-Session erstellen
+- [ ] Frontend leitet weiter zu `session.url`
+- [ ] Backend empfängt `payment_intent.succeeded` Webhook
+
+---
+
+## 4. 🗃️ Datenbank einrichten (z. B. SQLite)
+
+**Tabelle `orders`:**
+- `id`
+- `status` (`pending`, `paid`, `failed`)
+- `customer_name`, `email`, `address`
+- `items` (JSON)
+- `total_price`
+- `stripe_payment_id`
+- `paid_at`
+
+---
+
+## 5. ✉️ Optional: Erweiterungen
+
+- [ ] Bestätigungs-Mail an Kunde senden (z. B. mit nodemailer)
+- [ ] Admin-Login oder Dashboard zur Bestellübersicht
+- [ ] PDF-Rechnung generieren
+
+---
+
+## 6. 🚀 Deployment
+
+- [ ] Deployment auf Render, Railway oder eigenem Server
+- [ ] .env-Datei mit Stripe-Key & DB-Pfad absichern
+- [ ] SSL (HTTPS) aktivieren
+
+---
+
+## 📌 Notizen
+
+- Aktuell ist der Shop rein clientseitig → keine echte Zahlung
+- „Erfolg“-Meldung kommt auch ohne Bezahlung
+- Bestellung ist dadurch nicht geschützt vor Missbrauch

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SunSano – Frische Säfte & Smoothies</title>
+    <meta name="description" content="SunSano: 100% natürliche, frisch gepresste Säfte und Smoothies. Regional, saisonal und mit Liebe gemixt." />
+    <link rel="icon" href="assets/images/og-sunsano.png" />
+    <link rel="canonical" href="/" />
+    <meta property="og:title" content="SunSano – Frische Säfte & Smoothies" />
+    <meta property="og:description" content="100% natürliche, frisch gepresste Säfte. Jetzt entdecken und bestellen." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/images/og-sunsano.png" />
+    <meta name="theme-color" content="#2e7d32" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/checkout.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+    <header class="site-header" role="banner">
+      <div class="container header-inner">
+        <a class="brand" href="#start" aria-label="SunSano Startseite">
+          <span class="brand__logo" aria-hidden="true">🍊</span>
+          <span class="brand__text">SunSano</span>
+        </a>
+        <button class="nav-toggle" aria-controls="primary-nav" aria-expanded="false" aria-label="Menü öffnen">
+          <span class="nav-toggle__bar" aria-hidden="true"></span>
+          <span class="nav-toggle__bar" aria-hidden="true"></span>
+          <span class="nav-toggle__bar" aria-hidden="true"></span>
+        </button>
+        
+        <!-- Shopping Cart -->
+        <button class="cart-toggle" id="cart-toggle" aria-label="Warenkorb öffnen">
+          <span class="cart-icon" aria-hidden="true">🛒</span>
+          <span class="cart-count" id="cart-count">0</span>
+        </button>
+        <nav id="primary-nav" class="site-nav" aria-label="Hauptnavigation">
+          <ul class="nav-list">
+            <li><a href="#produkte">Produkte</a></li>
+            <li><a href="#ueber-uns">Über uns</a></li>
+            <li><a href="#bewertungen">Bewertungen</a></li>
+            <li><a href="#kontakt">Kontakt</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section id="start" class="section hero" aria-label="Einführung">
+        <div class="hero__media" role="img" aria-label="Frische Orangen und Grünsäfte" style="--hero-image: url('assets/images/hero.jpg')"></div>
+        <div class="container hero__content">
+          <h1 class="hero__title">100% natürlich. 100% frisch.</h1>
+          <p class="hero__subtitle">Direkt in deiner Nähe – Säfte & Smoothies von SunSano.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#kontakt">Jetzt bestellen</a>
+            <a class="btn btn--accent" href="assets/pdf/speisekarte.pdf" target="_blank" rel="noopener">Speisekarte (PDF)</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="produkte" class="section products" aria-labelledby="produkte-title">
+        <div class="container">
+          <header class="section__header">
+            <h2 id="produkte-title" class="section__title">Unsere Säfte</h2>
+            <p class="section__lead">Frisch gepresst, saisonal ausgewählt und liebevoll zubereitet.</p>
+          </header>
+
+          <div class="grid grid--products">
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-orange.jpg" alt="Orangen-Saft in Glasflasche" />
+              <div class="card__body">
+                <h3 class="card__title">Sunny Orange</h3>
+                <p class="card__text">100% Orange – süß, sonnig, erfrischend.</p>
+                <div class="card__meta">
+                  <span class="price">€3,90</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-green.jpg" alt="Grüner Detox-Saft mit Spinat und Apfel" />
+              <div class="card__body">
+                <h3 class="card__title">Green Power</h3>
+                <p class="card__text">Spinat, Apfel, Gurke – der grüne Energiekick.</p>
+                <div class="card__meta">
+                  <span class="price">€4,50</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-berry.jpg" alt="Roter Beerenmix-Saft" />
+              <div class="card__body">
+                <h3 class="card__title">Berry Boost</h3>
+                <p class="card__text">Beerenmix mit einem Hauch Minze.</p>
+                <div class="card__meta">
+                  <span class="price">€4,20</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-carrot.jpg" alt="Oranger Karotten-Ingwer-Saft" />
+              <div class="card__body">
+                <h3 class="card__title">Carrot Zing</h3>
+                <p class="card__text">Karotte, Apfel, Ingwer – mild und würzig.</p>
+                <div class="card__meta">
+                  <span class="price">€3,80</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-pineapple.jpg" alt="Gelber Ananas-Saft mit Kokosnote" />
+              <div class="card__body">
+                <h3 class="card__title">Tropic Wave</h3>
+                <p class="card__text">Ananas, Kokoswasser, Limette – pures Urlaubsgefühl.</p>
+                <div class="card__meta">
+                  <span class="price">€4,90</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card product-card">
+              <img class="card__media" src="assets/images/product-citrus.jpg" alt="Sommerlicher Zitrusmix mit Grapefruit" />
+              <div class="card__body">
+                <h3 class="card__title">Citrus Splash</h3>
+                <p class="card__text">Zitrusmix mit Grapefruit – spritzig frisch.</p>
+                <div class="card__meta">
+                  <span class="price">€4,10</span>
+                  <button class="btn btn--outline" type="button">In den Korb</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="ueber-uns" class="section about" aria-labelledby="about-title">
+        <div class="container">
+          <header class="section__header">
+            <h2 id="about-title" class="section__title">Über SunSano</h2>
+            <p class="section__lead">Wir pressen frisch – ohne Zusätze, ohne Kompromisse.</p>
+          </header>
+          <div class="content-cols">
+            <div>
+              <p>SunSano ist deine lokale Saftbar. Wir glauben an Qualität, Transparenz. Unsere Rezepte sind saisonal inspiriert und werden täglich frisch zubereitet.</p>
+              <p>Ob Detox, Vitamin-Kick oder einfach Genuss – bei uns findest du deinen Mix.</p>
+            </div>
+            <aside class="note" aria-label="Hinweis">
+              <strong>Hinweis:</strong> Wir verwenden ausschließlich wiederverwendbare oder recycelte Verpackungen.
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="bewertungen" class="section reviews" aria-labelledby="bewertungen-title">
+        <div class="container">
+          <header class="section__header">
+            <h2 id="bewertungen-title" class="section__title">Bewertungen unserer Gäste</h2>
+            <p class="section__lead">Das sagen unsere Kunden über SunSano</p>
+          </header>
+          
+          <!-- Latest 5 Reviews Preview -->
+          <div class="reviews-preview">
+            <div class="grid grid--reviews" id="reviews-preview-grid">
+              <!-- Latest reviews will be loaded here -->
+            </div>
+                      <div class="reviews-preview__actions">
+            <button class="btn btn--primary" id="show-all-reviews">Alle Bewertungen anzeigen</button>
+            <button class="btn btn--accent" id="add-review">Bewertung schreiben</button>
+          </div>
+          </div>
+
+          <!-- All Reviews Modal -->
+          <div class="modal" id="reviews-modal" aria-hidden="true">
+            <div class="modal__overlay" id="modal-overlay"></div>
+            <div class="modal__content">
+              <div class="modal__header">
+                <h3>Alle Bewertungen</h3>
+                <button class="modal__close" id="modal-close" aria-label="Schließen">×</button>
+              </div>
+              
+              <!-- Filter Controls -->
+              <div class="reviews-filter">
+                <div class="filter-group">
+                  <label for="rating-filter">Sterne filtern:</label>
+                  <select id="rating-filter">
+                    <option value="">Alle Bewertungen</option>
+                    <option value="5">5 Sterne</option>
+                    <option value="4">4+ Sterne</option>
+                    <option value="3">3+ Sterne</option>
+                    <option value="2">2+ Sterne</option>
+                    <option value="1">1+ Sterne</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="sort-filter">Sortieren nach:</label>
+                  <select id="sort-filter">
+                    <option value="newest">Neueste zuerst</option>
+                    <option value="oldest">Älteste zuerst</option>
+                    <option value="rating">Höchste Bewertung</option>
+                    <option value="helpful">Hilfreichste</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- All Reviews Grid -->
+              <div class="reviews-grid" id="all-reviews-grid">
+                <!-- All reviews will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="kontakt" class="section contact" aria-labelledby="kontakt-title">
+        <div class="container">
+          <header class="section__header">
+            <h2 id="kontakt-title" class="section__title">Kontakt</h2>
+            <p class="section__lead">Bestellung oder Frage? Schreib uns eine Nachricht.</p>
+          </header>
+          <form class="form" action="#" method="post" novalidate>
+            <div class="form__row">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required />
+            </div>
+            <div class="form__row">
+              <label for="email">E‑Mail</label>
+              <input id="email" name="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="form__row">
+              <div class="form__label-row">
+                <label for="message">Nachricht</label>
+                <span id="message-hint" class="form__hint">Max. 500 Zeichen</span>
+              </div>
+              <textarea id="message" name="message" rows="5" maxlength="500" aria-describedby="message-hint"></textarea>
+            </div>
+            <div class="form__actions">
+              <button class="btn btn--primary" type="submit">Senden</button>
+              <button class="btn btn--secondary" type="reset">Zurücksetzen</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Add Review Modal -->
+      <div class="modal" id="add-review-modal" aria-hidden="true">
+        <div class="modal__overlay" id="add-review-overlay"></div>
+        <div class="modal__content modal__content--review">
+          <div class="modal__header">
+            <h3>Bewertung schreiben</h3>
+            <button class="modal__close" id="add-review-close" aria-label="Schließen">×</button>
+          </div>
+          
+          <form class="review-form" id="review-form">
+            <div class="form-group">
+              <label for="review-author">Name *</label>
+              <input type="text" id="review-author" name="author" required>
+            </div>
+            
+            <div class="form-group">
+              <label>Bewertung *</label>
+              <div class="rating-input">
+                <input type="radio" id="star-5" name="rating" value="5" required>
+                <label for="star-5" class="star-label">★</label>
+                <input type="radio" id="star-4" name="rating" value="4">
+                <label for="star-4" class="star-label">★</label>
+                <input type="radio" id="star-3" name="rating" value="3">
+                <label for="star-3" class="star-label">★</label>
+                <input type="radio" id="star-2" name="rating" value="2">
+                <label for="star-2" class="star-label">★</label>
+                <input type="radio" id="star-1" name="rating" value="1">
+                <label for="star-1" class="star-label">★</label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-text">Ihre Bewertung *</label>
+              <textarea id="review-text" name="text" rows="4" required 
+                placeholder="Teilen Sie Ihre Erfahrung mit SunSano..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="review-product">Gekauftes Produkt (optional)</label>
+              <select id="review-product" name="product">
+                <option value="">Kein spezifisches Produkt</option>
+                <option value="Sunny Orange">Sunny Orange</option>
+                <option value="Green Power">Green Power</option>
+                <option value="Berry Boost">Berry Boost</option>
+                <option value="Carrot Zing">Carrot Zing</option>
+                <option value="Tropic Wave">Tropic Wave</option>
+                <option value="Citrus Splash">Citrus Splash</option>
+              </select>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn--secondary" id="cancel-review">Abbrechen</button>
+              <button type="submit" class="btn btn--primary">Bewertung veröffentlichen</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Shopping Cart Modal -->
+      <div class="modal" id="cart-modal" aria-hidden="true">
+        <div class="modal__overlay" id="cart-overlay"></div>
+        <div class="modal__content modal__content--cart">
+          <div class="modal__header">
+            <h3>Warenkorb</h3>
+            <button class="modal__close" id="cart-close" aria-label="Schließen">×</button>
+          </div>
+          
+          <div class="cart-content">
+            <div class="cart-items" id="cart-items">
+              <!-- Cart items will be loaded here -->
+            </div>
+            
+            <div class="cart-summary">
+              <div class="cart-total">
+                <span>Gesamt:</span>
+                <span class="cart-total-price" id="cart-total">€0,00</span>
+              </div>
+              <div class="cart-actions">
+                <button class="btn btn--secondary" id="clear-cart">Warenkorb leeren</button>
+                <button class="btn btn--primary" id="checkout">Zur Kasse</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div class="container footer-inner">
+        <p>© 2025 SunSano. Alle Rechte vorbehalten.</p>
+        <nav class="footer-nav" aria-label="Fußzeilen-Navigation">
+          <ul class="nav-list nav-list--inline">
+            <li><a href="#start">Start</a></li>
+            <li><a href="#produkte">Produkte</a></li>
+            <li><a href="#kontakt">Kontakt</a></li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
