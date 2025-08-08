@@ -6,6 +6,9 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Import database
+const database = require('./database');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -14,10 +17,22 @@ const ordersRouter = require('./routes/orders');
 const reviewsRouter = require('./routes/reviews');
 const productsRouter = require('./routes/products');
 const paymentsRouter = require('./routes/payments');
+const stripeRouter = require('./routes/stripe');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
 const { logger } = require('./utils/logger');
+
+// Initialize database
+async function initializeApp() {
+  try {
+    await database.init();
+    logger.info('Database initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize database:', error);
+    process.exit(1);
+  }
+}
 
 // Security middleware
 app.use(helmet());
@@ -49,7 +64,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
+    database: 'connected'
   });
 });
 
@@ -58,6 +74,7 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/stripe', stripeRouter);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -70,11 +87,30 @@ app.use('*', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  database.close();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  database.close();
+  process.exit(0);
+});
+
 // Start server
-app.listen(PORT, () => {
-  logger.info(`🚀 SunSano Backend running on port ${PORT}`);
-  logger.info(`📊 Health check: http://localhost:${PORT}/health`);
-  logger.info(`🔗 API Base: http://localhost:${PORT}/api`);
+initializeApp().then(() => {
+  app.listen(PORT, () => {
+    logger.info(`🚀 SunSano Backend running on port ${PORT}`);
+    logger.info(`📊 Health check: http://localhost:${PORT}/health`);
+    logger.info(`🔗 API Base: http://localhost:${PORT}/api`);
+    logger.info(`💳 Stripe API: http://localhost:${PORT}/api/stripe`);
+  });
+}).catch(error => {
+  logger.error('Failed to start server:', error);
+  process.exit(1);
 });
 
 module.exports = app;

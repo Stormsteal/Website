@@ -1,28 +1,40 @@
 # ✅ SunSano Webshop – To-Do Übersicht für echten Zahlungsprozess
 
 ## 🎯 Ziel
-Statt nur einer Simulation im Frontend soll der Webshop ein echtes, sicheres Bestellsystem mit Zahlungsanbindung (z. B. Stripe) und Backend-Verarbeitung bekommen.
+Statt nur einer Simulation im Frontend soll der Webshop ein echtes, sicheres Bestellsystem mit Zahlungsanbindung (z. B. Stripe) und Backend-Verarbeitung bekommen.
 
 ---
 
 ## 1. 🧼 Frontend aufräumen & vorbereiten
 
-- [ ] `checkout.js`-Simulation entfernen (aktuell nur Fake-„Bestellung erfolgreich“)
-- [ ] UI beibehalten (Warenkorb, Formular, Zahlungsoptionen)
-- [ ] Echte Weiterleitung zu Stripe / PayPal integrieren
-- [ ] API-Call zum Backend beim Klick auf "Bestellung aufgeben"
+- [x] `checkout.js`-Simulation entfernen (aktuell nur Fake-„Bestellung erfolgreich")
+  - ✅ Echte Stripe-Integration implementiert
+  - ✅ API-Calls zum Backend hinzugefügt
+  - ✅ Weiterleitung zu Stripe Checkout
+- [x] UI beibehalten (Warenkorb, Formular, Zahlungsoptionen)
+  - ✅ Bestehende UI-Struktur beibehalten
+  - ✅ Zahlungsoptionen auf "card" als Standard geändert
+- [x] Echte Weiterleitung zu Stripe / PayPal integrieren
+  - ✅ Stripe Checkout Session Integration
+  - ✅ Success/Cancel Pages erstellt
+- [x] API-Call zum Backend beim Klick auf "Bestellung aufgeben"
+  - ✅ POST /api/stripe/create-checkout-session implementiert
 
 ---
 
-## 2. ⚙️ Backend erstellen (z. B. Node.js + Express)
+## 2. ⚙️ Backend erstellen (z. B. Node.js + Express)
 
-- [ ] Route: `POST /api/create-order`
-  - Speichert Kunden- und Bestelldaten
-  - Erstellt Stripe-Checkout-Session
-- [ ] Route: `POST /api/webhook`
-  - Empfängt Zahlungsbestätigung von Stripe
-  - Setzt Bestellstatus auf `paid`
-- [ ] Verbindung zu Datenbank (z. B. SQLite)
+- [x] Route: `POST /api/create-order`
+  - ✅ Speichert Kunden- und Bestelldaten in SQLite
+  - ✅ Erstellt Stripe-Checkout-Session
+  - ✅ Implementiert als `/api/stripe/create-checkout-session`
+- [x] Route: `POST /api/webhook`
+  - ✅ Empfängt Zahlungsbestätigung von Stripe
+  - ✅ Setzt Bestellstatus auf `paid`
+  - ✅ Implementiert als `/api/stripe/webhook`
+- [x] Verbindung zu Datenbank (z. B. SQLite)
+  - ✅ SQLite-Datenbank mit `database.js` implementiert
+  - ✅ Tabellen für orders, products, reviews erstellt
 
 ---
 
@@ -30,44 +42,84 @@ Statt nur einer Simulation im Frontend soll der Webshop ein echtes, sicheres Bes
 
 ### Stripe (empfohlen):
 
-- [ ] Stripe API Key einrichten
-- [ ] Checkout-Session erstellen
-- [ ] Frontend leitet weiter zu `session.url`
-- [ ] Backend empfängt `payment_intent.succeeded` Webhook
+- [x] Stripe API Key einrichten
+  - ✅ Stripe Service mit Konfiguration erstellt
+  - ✅ Environment-Variablen für Stripe Keys definiert
+  - ✅ Fallback für Development ohne Keys
+- [x] Checkout-Session erstellen
+  - ✅ `StripeService.createCheckoutSession()` implementiert
+  - ✅ Produktdaten werden korrekt an Stripe übermittelt
+- [x] Frontend leitet weiter zu `session.url`
+  - ✅ Automatische Weiterleitung nach Session-Erstellung
+- [x] Backend empfängt `payment_intent.succeeded` Webhook
+  - ✅ Webhook-Handler für verschiedene Event-Typen
+  - ✅ Automatische Bestellstatus-Updates
 
 ---
 
-## 4. 🗃️ Datenbank einrichten (z. B. SQLite)
+## 4. 🗃️ Datenbank einrichten (z. B. SQLite)
 
 **Tabelle `orders`:**
-- `id`
-- `status` (`pending`, `paid`, `failed`)
-- `customer_name`, `email`, `address`
-- `items` (JSON)
-- `total_price`
-- `stripe_payment_id`
-- `paid_at`
+- [x] `id` - ✅ UUID als Primärschlüssel
+- [x] `status` (`pending`, `paid`, `failed`) - ✅ Implementiert
+- [x] `customer_name`, `email`, `address` - ✅ Alle Felder implementiert
+- [x] `items` (JSON) - ✅ JSON-Serialisierung für Warenkorb
+- [x] `total_price` - ✅ Berechnung mit Lieferkosten
+- [x] `stripe_payment_id` - ✅ Stripe Payment Intent ID
+- [x] `paid_at` - ✅ Timestamp für Zahlungsabschluss
 
 ---
 
 ## 5. ✉️ Optional: Erweiterungen
 
-- [ ] Bestätigungs-Mail an Kunde senden (z. B. mit nodemailer)
+- [x] Bestätigungs-Mail an Kunde senden (z. B. mit nodemailer)
+  - ✅ `EmailService` mit HTML-Templates erstellt
+  - ✅ Automatische E-Mails bei erfolgreicher Zahlung
+  - ✅ E-Mail bei fehlgeschlagener Zahlung
 - [ ] Admin-Login oder Dashboard zur Bestellübersicht
+  - 🔄 Geplant für nächste Phase
 - [ ] PDF-Rechnung generieren
+  - 🔄 Geplant für nächste Phase
 
 ---
 
 ## 6. 🚀 Deployment
 
 - [ ] Deployment auf Render, Railway oder eigenem Server
-- [ ] .env-Datei mit Stripe-Key & DB-Pfad absichern
+  - 🔄 Bereit für Deployment
+- [x] .env-Datei mit Stripe-Key & DB-Pfad absichern
+  - ✅ `env.example` mit allen notwendigen Variablen erstellt
 - [ ] SSL (HTTPS) aktivieren
+  - 🔄 Wird beim Deployment aktiviert
 
 ---
 
 ## 📌 Notizen
 
-- Aktuell ist der Shop rein clientseitig → keine echte Zahlung
-- „Erfolg“-Meldung kommt auch ohne Bezahlung
-- Bestellung ist dadurch nicht geschützt vor Missbrauch
+- ✅ Echte Zahlungsverarbeitung implementiert
+- ✅ Sichere Webhook-Verarbeitung mit Signatur-Verifikation
+- ✅ Datenbank-Persistierung für alle Bestellungen
+- ✅ E-Mail-Benachrichtigungen für Kunden
+- ✅ Fallback-Modus für Development ohne Stripe-Keys
+
+## 🔧 Implementierte Features
+
+### Backend:
+- SQLite-Datenbank mit vollständiger Schema-Definition
+- Stripe Service mit Checkout-Session-Management
+- Webhook-Handler für Zahlungsbestätigungen
+- Email Service mit HTML-Templates
+- Order Service mit Datenbank-Integration
+- Vollständige API-Routes für alle Funktionen
+
+### Frontend:
+- Echte Stripe-Integration statt Simulation
+- Success/Cancel Pages für Zahlungsabschluss
+- API-Calls zum Backend für Session-Erstellung
+- Verbesserte Fehlerbehandlung
+
+### Sicherheit:
+- Webhook-Signatur-Verifikation
+- Rate Limiting
+- Input-Validierung
+- Sichere Datenbank-Operationen

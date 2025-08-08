@@ -439,8 +439,8 @@ class CheckoutSystem {
       this.updateProgress();
       this.showStep(4);
       
-      // Start payment processing
-      await this.processPayment();
+      // Create order and redirect to Stripe
+      await this.createStripeCheckoutSession();
       
     } catch (error) {
       console.error('Order processing failed:', error);
@@ -460,12 +460,80 @@ class CheckoutSystem {
 
   getSelectedPaymentMethod() {
     const selectedPayment = document.querySelector('input[name="payment"]:checked');
-    return selectedPayment ? selectedPayment.value : 'cash';
+    return selectedPayment ? selectedPayment.value : 'card';
   }
 
   getTotalAmount() {
     const subtotal = this.orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     return subtotal + 2.50; // Including delivery
+  }
+
+  async createStripeCheckoutSession() {
+    const paymentMethod = this.getSelectedPaymentMethod();
+    const amount = this.getTotalAmount();
+    
+    // Update processing status
+    this.updateProcessingStatus('creating_session', 'Zahlungssession wird erstellt...');
+    
+    try {
+      // Call backend to create Stripe checkout session
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderData: {
+            ...this.orderData,
+            paymentMethod: paymentMethod,
+            subtotal: this.orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            deliveryCost: 2.50,
+            total: amount
+          }
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.data.sessionUrl) {
+        // Log successful session creation
+        PaymentLogger.log('stripe_session_created', {
+          orderId: result.data.orderId,
+          orderNumber: result.data.orderNumber,
+          sessionId: result.data.sessionId
+        });
+        
+        // Store session info for later verification
+        this.currentSessionId = result.data.sessionId;
+        this.currentOrderId = result.data.orderId;
+        
+        // Redirect to Stripe checkout
+        window.location.href = result.data.sessionUrl;
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
+      
+    } catch (error) {
+      console.error('Error creating Stripe session:', error);
+      this.paymentStateMachine.transition('failed');
+      throw new Error('Fehler beim Erstellen der Zahlungssession: ' + error.message);
+    }
+  }
+
+  async checkPaymentStatus(sessionId) {
+    try {
+      const response = await fetch(`/api/stripe/session/${sessionId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Failed to check payment status');
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+      throw error;
+    }
   }
 
   async processPayment() {

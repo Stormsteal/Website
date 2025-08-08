@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zahlung erfolgreich - SunSano</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .order-details {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Zahlung erfolgreich!</h1>
+        <p>Vielen Dank für Ihre Bestellung. Ihre Zahlung wurde erfolgreich verarbeitet.</p>
+        
+        <div class="order-details" id="order-details">
+            <h3>Bestelldetails</h3>
+            <p><strong>Bestellnummer:</strong> <span id="order-number">-</span></p>
+            <p><strong>Status:</strong> <span id="order-status">-</span></p>
+            <p><strong>Betrag:</strong> <span id="order-amount">-</span></p>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn">Zurück zum Shop</a>
+            <a href="/orders" class="btn btn-secondary">Meine Bestellungen</a>
+        </div>
+    </div>
+
+    <script>
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (sessionId) {
+            // Verify payment status with backend
+            fetch(`/api/stripe/session/${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('order-number').textContent = data.data.orderNumber || 'N/A';
+                        document.getElementById('order-status').textContent = 'Bezahlt';
+                        document.getElementById('order-amount').textContent = 'Wird geladen...';
+                        
+                        // Store order info in localStorage for later use
+                        localStorage.setItem('lastOrder', JSON.stringify({
+                            orderId: data.data.orderId,
+                            orderNumber: data.data.orderNumber,
+                            sessionId: sessionId,
+                            status: 'paid',
+                            timestamp: new Date().toISOString()
+                        }));
+                    } else {
+                        document.getElementById('order-details').innerHTML = 
+                            '<p style="color: red;">Fehler beim Laden der Bestelldetails.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error verifying payment:', error);
+                    document.getElementById('order-details').innerHTML = 
+                        '<p style="color: red;">Fehler beim Verifizieren der Zahlung.</p>';
+                });
+        } else {
+            document.getElementById('order-details').innerHTML = 
+                '<p style="color: red;">Keine Session-ID gefunden.</p>';
+        }
+    </script>
+</body>
+</html>

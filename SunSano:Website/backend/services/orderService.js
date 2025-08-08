@@ -1,309 +1,316 @@
 const { logger } = require('../utils/logger');
-
-// In-memory storage for demo (replace with database in production)
-let orders = new Map();
-let orderStats = {
-  total: 0,
-  pending: 0,
-  processing: 0,
-  paid: 0,
-  failed: 0,
-  cancelled: 0,
-  shipped: 0,
-  delivered: 0
-};
+const database = require('../database');
 
 class OrderService {
   // Create new order
   static async createOrder(orderData) {
-    const order = {
-      ...orderData,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      const order = {
+        ...orderData,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    orders.set(order.id, order);
-    orderStats.total++;
-    orderStats.pending++;
+      // Insert into database
+      await database.run(`
+        INSERT INTO orders (
+          id, order_number, status, customer_name, customer_email, 
+          customer_address, customer_zipcode, customer_city, items,
+          subtotal, delivery_cost, total_price, payment_method,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        order.id,
+        order.orderNumber,
+        order.status,
+        `${order.customer.firstname} ${order.customer.lastname}`,
+        order.customer.email,
+        order.customer.address,
+        order.customer.zipcode,
+        order.customer.city,
+        JSON.stringify(order.items),
+        order.subtotal,
+        order.deliveryCost,
+        order.total,
+        order.paymentMethod,
+        order.createdAt,
+        order.updatedAt
+      ]);
 
-    logger.info('Order created', {
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      customer: order.customer.email,
-      total: order.total
-    });
+      logger.info('Order created in database', {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customer: order.customer.email,
+        total: order.total
+      });
 
-    return order;
+      return order;
+    } catch (error) {
+      logger.error('Error creating order:', error);
+      throw new Error('Fehler beim Erstellen der Bestellung');
+    }
   }
 
   // Get order by ID
   static async getOrderById(orderId) {
-    return orders.get(orderId) || null;
+    try {
+      const order = await database.get(
+        'SELECT * FROM orders WHERE id = ?',
+        [orderId]
+      );
+
+      if (!order) {
+        return null;
+      }
+
+      // Parse items JSON
+      order.items = JSON.parse(order.items);
+      
+      return order;
+    } catch (error) {
+      logger.error('Error getting order by ID:', error);
+      throw new Error('Fehler beim Abrufen der Bestellung');
+    }
   }
 
   // Get all orders with pagination and filtering
   static async getAllOrders(options = {}) {
-    const { page = 1, limit = 20, status, customerEmail } = options;
-    
-    let filteredOrders = Array.from(orders.values());
-    
-    // Apply filters
-    if (status) {
-      filteredOrders = filteredOrders.filter(order => order.status === status);
-    }
-    
-    if (customerEmail) {
-      filteredOrders = filteredOrders.filter(order => 
-        order.customer.email.toLowerCase().includes(customerEmail.toLowerCase())
+    try {
+      const { page = 1, limit = 20, status, customerEmail } = options;
+      
+      let whereClause = '';
+      let params = [];
+      
+      // Build WHERE clause
+      if (status) {
+        whereClause += ' WHERE status = ?';
+        params.push(status);
+      }
+      
+      if (customerEmail) {
+        const emailClause = 'customer_email LIKE ?';
+        if (whereClause) {
+          whereClause += ' AND ' + emailClause;
+        } else {
+          whereClause = ' WHERE ' + emailClause;
+        }
+        params.push(`%${customerEmail}%`);
+      }
+
+      // Get total count
+      const countResult = await database.get(
+        `SELECT COUNT(*) as total FROM orders${whereClause}`,
+        params
       );
+      const total = countResult.total;
+
+      // Get paginated results
+      const offset = (page - 1) * limit;
+      const orders = await database.query(
+        `SELECT * FROM orders${whereClause} 
+         ORDER BY created_at DESC 
+         LIMIT ? OFFSET ?`,
+        [...params, limit, offset]
+      );
+
+      // Parse items JSON for each order
+      orders.forEach(order => {
+        order.items = JSON.parse(order.items);
+      });
+
+      return {
+        orders,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      logger.error('Error getting all orders:', error);
+      throw new Error('Fehler beim Abrufen der Bestellungen');
     }
-
-    // Sort by creation date (newest first)
-    filteredOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
-
-    return {
-      orders: paginatedOrders,
-      total: filteredOrders.length,
-      page,
-      limit,
-      totalPages: Math.ceil(filteredOrders.length / limit)
-    };
   }
 
   // Update order status
   static async updateOrderStatus(orderId, newStatus, notes = '') {
-    const order = orders.get(orderId);
-    if (!order) {
-      return null;
-    }
+    try {
+      const result = await database.run(
+        `UPDATE orders SET 
+          status = ?, 
+          updated_at = ?
+         WHERE id = ?`,
+        [newStatus, new Date().toISOString(), orderId]
+      );
 
-    const oldStatus = order.status;
-    
-    // Update order
-    order.status = newStatus;
-    order.updatedAt = new Date().toISOString();
-    
-    if (notes) {
-      order.notes = order.notes || [];
-      order.notes.push({
-        text: notes,
-        timestamp: new Date().toISOString(),
-        type: 'status_update'
+      if (result.changes === 0) {
+        return null;
+      }
+
+      logger.info('Order status updated', {
+        orderId,
+        newStatus,
+        notes
       });
+
+      return await this.getOrderById(orderId);
+    } catch (error) {
+      logger.error('Error updating order status:', error);
+      throw new Error('Fehler beim Aktualisieren des Bestellstatus');
     }
-
-    orders.set(orderId, order);
-
-    // Update stats
-    if (orderStats[oldStatus] > 0) {
-      orderStats[oldStatus]--;
-    }
-    if (orderStats[newStatus] !== undefined) {
-      orderStats[newStatus]++;
-    }
-
-    logger.info('Order status updated', {
-      orderId,
-      orderNumber: order.orderNumber,
-      oldStatus,
-      newStatus,
-      notes
-    });
-
-    return {
-      ...order,
-      previousStatus: oldStatus
-    };
   }
 
   // Cancel order
   static async cancelOrder(orderId) {
-    const order = orders.get(orderId);
-    if (!order) {
-      return null;
+    try {
+      const result = await database.run(
+        `UPDATE orders SET 
+          status = 'cancelled', 
+          updated_at = ?
+         WHERE id = ?`,
+        [new Date().toISOString(), orderId]
+      );
+
+      if (result.changes === 0) {
+        return null;
+      }
+
+      logger.info('Order cancelled', { orderId });
+      return await this.getOrderById(orderId);
+    } catch (error) {
+      logger.error('Error cancelling order:', error);
+      throw new Error('Fehler beim Stornieren der Bestellung');
     }
-
-    // Only allow cancellation of pending orders
-    if (order.status !== 'pending') {
-      throw new Error('Only pending orders can be cancelled');
-    }
-
-    const cancelledOrder = await this.updateOrderStatus(orderId, 'cancelled', 'Order cancelled by customer');
-
-    logger.info('Order cancelled', {
-      orderId,
-      orderNumber: order.orderNumber,
-      customer: order.customer.email
-    });
-
-    return cancelledOrder;
   }
 
   // Get order statistics
   static async getOrderStats() {
-    return {
-      ...orderStats,
-      averageOrderValue: this.calculateAverageOrderValue(),
-      recentOrders: this.getRecentOrders(7) // Last 7 days
-    };
+    try {
+      const stats = await database.query(`
+        SELECT 
+          status,
+          COUNT(*) as count,
+          SUM(total_price) as total_value
+        FROM orders 
+        GROUP BY status
+      `);
+
+      const total = await database.get('SELECT COUNT(*) as total FROM orders');
+      const totalValue = await database.get('SELECT SUM(total_price) as total_value FROM orders');
+
+      return {
+        total: total.total,
+        totalValue: totalValue.total_value || 0,
+        byStatus: stats.reduce((acc, stat) => {
+          acc[stat.status] = {
+            count: stat.count,
+            value: stat.total_value || 0
+          };
+          return acc;
+        }, {})
+      };
+    } catch (error) {
+      logger.error('Error getting order stats:', error);
+      throw new Error('Fehler beim Abrufen der Bestellstatistiken');
+    }
   }
 
-  // Calculate average order value
-  static calculateAverageOrderValue() {
-    const completedOrders = Array.from(orders.values()).filter(
-      order => ['paid', 'shipped', 'delivered'].includes(order.status)
-    );
+  // Get orders by customer email
+  static async getOrdersByCustomer(customerEmail) {
+    try {
+      const orders = await database.query(
+        'SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC',
+        [customerEmail]
+      );
 
-    if (completedOrders.length === 0) return 0;
+      // Parse items JSON for each order
+      orders.forEach(order => {
+        order.items = JSON.parse(order.items);
+      });
 
-    const totalValue = completedOrders.reduce((sum, order) => sum + order.total, 0);
-    return (totalValue / completedOrders.length).toFixed(2);
-  }
-
-  // Get recent orders
-  static getRecentOrders(days) {
-    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    
-    return Array.from(orders.values()).filter(
-      order => new Date(order.createdAt) >= cutoffDate
-    ).length;
+      return orders;
+    } catch (error) {
+      logger.error('Error getting orders by customer:', error);
+      throw new Error('Fehler beim Abrufen der Kundenbestellungen');
+    }
   }
 
   // Search orders
   static async searchOrders(query) {
-    const searchTerm = query.toLowerCase();
-    
-    return Array.from(orders.values()).filter(order => 
-      order.orderNumber.toLowerCase().includes(searchTerm) ||
-      order.customer.firstname.toLowerCase().includes(searchTerm) ||
-      order.customer.lastname.toLowerCase().includes(searchTerm) ||
-      order.customer.email.toLowerCase().includes(searchTerm)
-    );
-  }
+    try {
+      const searchTerm = `%${query}%`;
+      const orders = await database.query(`
+        SELECT * FROM orders 
+        WHERE order_number LIKE ? 
+           OR customer_name LIKE ? 
+           OR customer_email LIKE ?
+        ORDER BY created_at DESC
+      `, [searchTerm, searchTerm, searchTerm]);
 
-  // Get orders by customer
-  static async getOrdersByCustomer(customerEmail) {
-    return Array.from(orders.values()).filter(
-      order => order.customer.email.toLowerCase() === customerEmail.toLowerCase()
-    );
+      // Parse items JSON for each order
+      orders.forEach(order => {
+        order.items = JSON.parse(order.items);
+      });
+
+      return orders;
+    } catch (error) {
+      logger.error('Error searching orders:', error);
+      throw new Error('Fehler bei der Bestellsuche');
+    }
   }
 
   // Update order items
   static async updateOrderItems(orderId, items) {
-    const order = orders.get(orderId);
-    if (!order) {
-      throw new Error('Order not found');
-    }
+    try {
+      const result = await database.run(
+        `UPDATE orders SET 
+          items = ?,
+          subtotal = ?,
+          total_price = ?,
+          updated_at = ?
+         WHERE id = ?`,
+        [
+          JSON.stringify(items),
+          items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 2.50, // Add delivery cost
+          new Date().toISOString(),
+          orderId
+        ]
+      );
 
-    if (order.status !== 'pending') {
-      throw new Error('Only pending orders can be modified');
-    }
-
-    // Recalculate totals
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const deliveryCost = 2.50;
-    const total = subtotal + deliveryCost;
-
-    order.items = items;
-    order.subtotal = subtotal;
-    order.deliveryCost = deliveryCost;
-    order.total = total;
-    order.updatedAt = new Date().toISOString();
-
-    orders.set(orderId, order);
-
-    logger.info('Order items updated', {
-      orderId,
-      orderNumber: order.orderNumber,
-      newTotal: total
-    });
-
-    return order;
-  }
-
-  // Add order note
-  static async addOrderNote(orderId, note, type = 'general') {
-    const order = orders.get(orderId);
-    if (!order) {
-      throw new Error('Order not found');
-    }
-
-    order.notes = order.notes || [];
-    order.notes.push({
-      text: note,
-      type,
-      timestamp: new Date().toISOString()
-    });
-
-    order.updatedAt = new Date().toISOString();
-    orders.set(orderId, order);
-
-    logger.info('Order note added', {
-      orderId,
-      orderNumber: order.orderNumber,
-      noteType: type
-    });
-
-    return order;
-  }
-
-  // Get order history
-  static async getOrderHistory(orderId) {
-    const order = orders.get(orderId);
-    if (!order) {
-      return null;
-    }
-
-    return {
-      order,
-      history: order.notes || [],
-      statusChanges: this.getStatusChangeHistory(order)
-    };
-  }
-
-  // Get status change history
-  static getStatusChangeHistory(order) {
-    const statusChanges = [];
-    
-    if (order.notes) {
-      order.notes.forEach(note => {
-        if (note.type === 'status_update') {
-          statusChanges.push({
-            status: order.status,
-            timestamp: note.timestamp,
-            note: note.text
-          });
-        }
-      });
-    }
-
-    return statusChanges;
-  }
-
-  // Cleanup old orders (cron job)
-  static async cleanupOldOrders() {
-    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-    let cleanedCount = 0;
-
-    for (const [orderId, order] of orders.entries()) {
-      if (new Date(order.createdAt) < oneYearAgo && 
-          ['delivered', 'cancelled'].includes(order.status)) {
-        orders.delete(orderId);
-        cleanedCount++;
+      if (result.changes === 0) {
+        return null;
       }
-    }
 
-    if (cleanedCount > 0) {
-      logger.info('Cleaned up old orders', { cleanedCount });
+      logger.info('Order items updated', { orderId, itemCount: items.length });
+      return await this.getOrderById(orderId);
+    } catch (error) {
+      logger.error('Error updating order items:', error);
+      throw new Error('Fehler beim Aktualisieren der Bestellartikel');
     }
+  }
 
-    return cleanedCount;
+  // Get recent orders
+  static async getRecentOrders(days = 7) {
+    try {
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      
+      const orders = await database.query(
+        'SELECT * FROM orders WHERE created_at >= ? ORDER BY created_at DESC',
+        [date.toISOString()]
+      );
+
+      // Parse items JSON for each order
+      orders.forEach(order => {
+        order.items = JSON.parse(order.items);
+      });
+
+      return orders;
+    } catch (error) {
+      logger.error('Error getting recent orders:', error);
+      throw new Error('Fehler beim Abrufen der letzten Bestellungen');
+    }
   }
 }
 

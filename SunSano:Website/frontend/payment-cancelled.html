@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zahlung abgebrochen - SunSano</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .cancelled-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cancelled-icon {
+            width: 80px;
+            height: 80px;
+            background: #f44336;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="cancelled-container">
+        <div class="cancelled-icon">✕</div>
+        <h1>Zahlung abgebrochen</h1>
+        <p>Ihre Zahlung wurde abgebrochen. Keine Sorge - es wurden keine Kosten berechnet.</p>
+        
+        <div class="info-box">
+            <h3>Was passiert jetzt?</h3>
+            <ul style="text-align: left;">
+                <li>Ihre Bestellung wurde nicht abgeschlossen</li>
+                <li>Es wurden keine Kosten berechnet</li>
+                <li>Sie können jederzeit eine neue Bestellung aufgeben</li>
+            </ul>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn">Zurück zum Shop</a>
+            <a href="/checkout" class="btn btn-secondary">Bestellung wiederholen</a>
+        </div>
+    </div>
+
+    <script>
+        // Clear any stored checkout data
+        localStorage.removeItem('checkoutData');
+        localStorage.removeItem('cartItems');
+        
+        // Log cancellation for analytics
+        console.log('Payment cancelled by user');
+    </script>
+</body>
+</html>
